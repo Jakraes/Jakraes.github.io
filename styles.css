@@ -31,7 +31,7 @@ body {
 .links {
     display: flex;
     position: absolute;
-    gap: 3em;
+    gap: 2em;
     bottom: 0;
     margin-bottom: 1em;
     width: 100%;

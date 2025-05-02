@@ -40,7 +40,7 @@ geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)
 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
 const material = new THREE.PointsMaterial({
-    size: 0.2,
+    size: 0.18,
     map: dotTexture,
     transparent: true,
     vertexColors: true,
