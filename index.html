@@ -24,7 +24,6 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
     <section class="full">
-        <canvas id="grain-canvas"></canvas>
         <div class="container">
             <p style="margin: 0; font-size: 7vw;"> João <br> Carvalho </p>
             <p style="font-size: 1.5vw;">Software Developer</p>
@@ -39,37 +38,6 @@
         <div id="sphere-container"></div>
     </section>
     <script src="sphere.js" async defer></script>
-    <script>
-        const canvas = document.getElementById('grain-canvas');
-        const ctx = canvas.getContext('2d');
-    
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-    
-        function generateGrain() {
-            const imageData = ctx.createImageData(canvas.width, canvas.height);
-            const buffer = new Uint32Array(imageData.data.buffer);
-            const len = buffer.length;
-            for (let i = 0; i < len; i++) {
-                const gray = Math.random() * 80 | 0; // darker, subtler noise
-                buffer[i] = (60 << 24) | (gray << 16) | (gray << 8) | gray; // alpha = 60/255
-            }
-            ctx.putImageData(imageData, 0, 0);
-        }
-    
-        function loop() {
-            generateGrain();
-            setTimeout(loop, 100); // ~10 frames per second
-        }
-    
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        loop();
-    </script>
-    
-    
 </body>
 
 </html>
