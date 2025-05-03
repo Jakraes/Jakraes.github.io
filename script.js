@@ -284,5 +284,28 @@ function addViewportMeta() {
     }
 }
 
+// Fix for double scrollbar issue
+function fixScrollbars() {
+    // Force only one scrollbar by ensuring only one scrollable container
+    document.documentElement.style.overflowY = 'scroll';
+    document.body.style.overflowY = 'visible';
+    
+    // Remove any potential duplicate scrollbars
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        body::-webkit-scrollbar {
+            display: none !important;
+        }
+        html::-webkit-scrollbar:nth-of-type(2),
+        body::-webkit-scrollbar:nth-of-type(2) {
+            display: none !important;
+        }
+    `;
+    document.head.appendChild(styleEl);
+}
+
 // Call on page load
-window.addEventListener('DOMContentLoaded', addViewportMeta);
+window.addEventListener('DOMContentLoaded', () => {
+    addViewportMeta();
+    fixScrollbars();
+});
