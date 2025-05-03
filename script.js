@@ -221,3 +221,26 @@ revealElements.forEach(section => {
 // Check on load and scroll
 window.addEventListener('load', checkReveal);
 window.addEventListener('scroll', checkReveal);
+
+// Mobile Menu Functionality
+const hamburger = document.querySelector(".hamburger");
+const navMenu = document.querySelector(".nav-menu");
+const navLinks = document.querySelectorAll(".nav-link");
+const header = document.querySelector("header");
+
+hamburger.addEventListener("click", mobileMenu);
+navLinks.forEach(n => n.addEventListener("click", closeMenu));
+
+function mobileMenu() {
+    hamburger.classList.toggle("active");
+    navMenu.classList.toggle("active");
+    document.body.classList.toggle("no-scroll");
+    header.classList.toggle("menu-open");
+}
+
+function closeMenu() {
+    hamburger.classList.remove("active");
+    navMenu.classList.remove("active");
+    document.body.classList.remove("no-scroll");
+    header.classList.remove("menu-open");
+}
