@@ -64,6 +64,11 @@ body {
     transition: background-color 0.5s ease, color 0.5s ease;
 }
 
+/* Prevent scrolling when mobile menu is open */
+body.no-scroll {
+    overflow: hidden;
+}
+
 a {
     color: var(--text-color);
     text-decoration: none;
@@ -710,22 +715,15 @@ footer {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    body.no-scroll {
-        overflow: hidden;
-    }
-    
     header {
         padding: 1rem;
-    }
-
-    header.menu-open {
-        background-color: transparent;
     }
     
     .hamburger {
         display: block;
         margin-left: auto;
         margin-right: 1.5rem; /* Add space between hamburger and theme toggle */
+        z-index: 101;
     }
     
     .hamburger.active .bar:nth-child(2) {
@@ -791,14 +789,6 @@ footer {
         font-size: 6vw;
     }
     
-    header {
-        padding: 1rem;
-    }
-    
-    nav ul {
-        gap: 1rem;
-    }
-    
     section {
         padding: 6rem 1rem;
     }
@@ -823,7 +813,8 @@ footer {
     .skill-item {
         padding: 0.5rem 1rem;
     }
-
+    
+    /* Make sure header elements don't get too close on very small screens */
     @media (max-width: 360px) {
         header {
             padding: 0.75rem;
@@ -842,4 +833,9 @@ footer {
             height: 35px;
         }
     }
+}
+
+/* Header when menu is open */
+header.menu-open {
+    background-color: transparent;
 }
