@@ -274,8 +274,14 @@ function addViewportMeta() {
         document.head.appendChild(viewportMeta);
     }
     
-    // Set viewport meta content to prevent scaling/zooming that might cause horizontal scroll
-    viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    // Set viewport meta content for desktop and mobile differently
+    if (isTouchDevice()) {
+        // For mobile devices - prevent scaling
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    } else {
+        // For desktop - allow normal behavior
+        viewportMeta.content = 'width=device-width, initial-scale=1.0';
+    }
 }
 
 // Call on page load
