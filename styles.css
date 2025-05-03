@@ -710,8 +710,16 @@ footer {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+    body.no-scroll {
+        overflow: hidden;
+    }
+    
     header {
         padding: 1rem;
+    }
+
+    header.menu-open {
+        background-color: transparent;
     }
     
     .hamburger {
