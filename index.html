@@ -1,43 +1,225 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title></title>
-    <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>João Carvalho — Portfolio</title>
+    <meta name="description" content="Embedded Systems Software Developer">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 </head>
 
-<body class="jetbrains-mono">
-    <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-    <section class="full">
-        <div class="container">
-            <p style="margin: 0; font-size: 7vw;"> João <br> Carvalho </p>
-            <p style="font-size: 1.5vw;">Software Developer</p>
+<body>
+    <div class="noise"></div>
+    
+    <header>
+        <div class="logo">JC</div>
+        <nav>
+            <ul>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#experience" class="nav-link">Experience</a></li>
+                <li><a href="#skills" class="nav-link">Skills</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+        <button id="theme-toggle" aria-label="Toggle dark/light mode">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </header>
 
-            <div class="links" style="font-size: 1.5vw;">
-                <a href="">About me.</a>
-                <a href="/wasm/">Projects.</a>
-                <a href="">Links.</a>
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <h1 class="glitch" data-text="JOÃO CARVALHO">JOÃO CARVALHO</h1>
+                <div class="title-container">
+                    <div class="title-line"></div>
+                    <p class="title">Embedded Systems Software Developer</p>
+                </div>
             </div>
-        </div>
+            <div class="scroll-indicator">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </section>
 
-        <div id="sphere-container"></div>
-    </section>
-    <script src="sphere.js" async defer></script>
+        <section id="about">
+            <div class="section-header">
+                <span class="section-number">01</span>
+                <h2>About</h2>
+            </div>
+            <div class="about-content">
+                <p class="large-text">Developing firmware and software solutions with a focus on embedded systems.</p>
+                <div class="about-details">
+                    <p>I specialize in developing firmware for embedded systems, with experience in satellite technology and full-stack development. My approach combines technical expertise with creative problem-solving.</p>
+                    <p>Based in <span class="highlight">Lisbon, Portugal</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience">
+            <div class="section-header">
+                <span class="section-number">02</span>
+                <h2>Experience</h2>
+            </div>
+            <div class="experience-content">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span>11/2024 - Present</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h3>Embedded Systems Software Developer</h3>
+                            <h4>Espaço^3, Lisbon</h4>
+                            <ul>
+                                <li>Currently developing firmware for a satellite</li>
+                                <li>Using C and ARM Assembly to develop firmware for a Cortex-M7 (Teensy 4.1 and STM32 chips)</li>
+                                <li>Briefly developed an RTOS, eventually switched to FreeRTOS</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span>01/2024 - 04/2024</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h3>Full-stack Developer (Intern)</h3>
+                            <h4>GovWise, Lisbon</h4>
+                            <ul>
+                                <li>Used Python, Svelte and PostgreSQL</li>
+                                <li>Fixed and maintained various web scrapers</li>
+                                <li>Fixed and maintained APIs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">
+                            <span>12/2022 - Present</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h3>Project Lead / Software Developer</h3>
+                            <h4>ACM ISCTE-IUL, Lisbon</h4>
+                            <ul>
+                                <li>Led various software development projects, mainly regarding AI and Computer Vision</li>
+                                <li>Used Python, OpenCV, Svelte, React, Rust and Linux</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="education">
+                    <h3>Education</h3>
+                    <div class="education-item">
+                        <div class="education-date">09/2021 - 01/2025</div>
+                        <div class="education-content">
+                            <h4>Bachelor's Degree in Computer Science and Engineering</h4>
+                            <p>ISCTE-IUL, Lisbon</p>
+                            <p>Final grade: 14/20</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills">
+            <div class="section-header">
+                <span class="section-number">03</span>
+                <h2>Skills</h2>
+            </div>
+            <div class="skills-content">
+                <div class="skills-category">
+                    <h3>Programming Languages</h3>
+                    <div class="skills-grid">
+                        <div class="skill-item">C (C99)</div>
+                        <div class="skill-item">C++ (C++17)</div>
+                        <div class="skill-item">Rust</div>
+                        <div class="skill-item">Assembly (x86-64)</div>
+                        <div class="skill-item">Bash</div>
+                        <div class="skill-item">Python</div>
+                        <div class="skill-item">SQL</div>
+                        <div class="skill-item">JavaScript</div>
+                        <div class="skill-item">Java</div>
+                        <div class="skill-item">Nim</div>
+                    </div>
+                </div>
+                
+                <div class="skills-category">
+                    <h3>Systems</h3>
+                    <div class="skills-grid">
+                        <div class="skill-item">Linux (Debian, Ubuntu, Fedora, Arch)</div>
+                        <div class="skill-item">FreeRTOS</div>
+                    </div>
+                </div>
+                
+                <div class="skills-category">
+                    <h3>Web Technologies</h3>
+                    <div class="skills-grid">
+                        <div class="skill-item">Svelte</div>
+                        <div class="skill-item">React</div>
+                        <div class="skill-item">Django</div>
+                    </div>
+                </div>
+                
+                <div class="skills-category">
+                    <h3>Databases</h3>
+                    <div class="skills-grid">
+                        <div class="skill-item">PostgreSQL</div>
+                        <div class="skill-item">MySQL</div>
+                    </div>
+                </div>
+                
+                <div class="skills-category">
+                    <h3>Soft Skills</h3>
+                    <div class="skills-grid">
+                        <div class="skill-item">Teamworker</div>
+                        <div class="skill-item">Problem Solver</div>
+                        <div class="skill-item">Adaptable</div>
+                        <div class="skill-item">Researcher</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="section-header">
+                <span class="section-number">04</span>
+                <h2>Contact</h2>
+            </div>
+            <div class="contact-content">
+                <p class="large-text">Let's work together.</p>
+                <div class="contact-links">
+                    <a href="mailto:joaomarquescarvalho2021@gmail.com" class="contact-link">joaomarquescarvalho2021@gmail.com</a>
+                    <a href="tel:+351937754601" class="contact-link">(+351) 937754601</a>
+                    <a href="https://github.com/" target="_blank" class="contact-link">GitHub</a>
+                    <a href="https://linkedin.com/" target="_blank" class="contact-link">LinkedIn</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 João Carvalho</p>
+        <div class="footer-line"></div>
+    </footer>
+
+    <div id="cursor"></div>
+    <div id="cursor-border"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <script src="script.js"></script>
 </body>
-
 </html>
