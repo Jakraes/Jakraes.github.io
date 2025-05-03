@@ -912,7 +912,7 @@ header.menu-open {
 /* Fix for horizontal scrolling on mobile */
 main {
     width: 100%;
-    overflow-y: visible;
+    overflow-y: hidden;
     overflow-x: hidden;
 }
 
