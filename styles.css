@@ -46,12 +46,15 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    max-width: 100%; /* Ensure no element exceeds viewport width */
 }
 
 html {
     scroll-behavior: smooth;
     cursor: none;
     overflow-x: hidden; /* Prevent horizontal scrolling */
+    width: 100%;
+    max-width: 100vw;
 }
 
 body {
@@ -63,7 +66,8 @@ body {
     overflow-x: hidden; /* Prevent horizontal scrolling */
     position: relative;
     transition: background-color 0.5s ease, color 0.5s ease;
-    width: 100%; /* Ensure body doesn't exceed viewport width */
+    width: 100%;
+    max-width: 100vw;
 }
 
 /* Prevent scrolling when mobile menu is open */
@@ -165,6 +169,17 @@ body[data-theme="light"] .moon-icon {
     transition: width 0.3s, height 0.3s, border 0.3s, opacity 0.5s ease;
 }
 
+/* Hide custom cursor on mobile/touch devices */
+@media (hover: none) and (pointer: coarse) {
+    html {
+        cursor: auto;
+    }
+    
+    #cursor, #cursor-border {
+        display: none;
+    }
+}
+
 /* Header */
 header {
     position: fixed;
@@ -180,6 +195,7 @@ header {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     transition: background-color 0.5s ease;
+    box-sizing: border-box;
 }
 
 .header-left, .header-right {
@@ -257,6 +273,7 @@ nav ul {
     position: relative;
     width: 100%; /* Ensure full width */
     max-width: 100%; /* Prevent overflow */
+    overflow-x: hidden;
 }
 
 .hero-content {
@@ -264,6 +281,8 @@ nav ul {
     z-index: 2;
     width: 100%; /* Full width */
     padding: 0 1rem; /* Add padding for small screens */
+    max-width: 100vw;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -351,6 +370,8 @@ h1 {
     justify-content: center;
     gap: 1rem;
     flex-wrap: wrap; /* Allow wrapping on small screens */
+    width: 100%;
+    max-width: 100%;
 }
 
 .title-line {
@@ -407,6 +428,7 @@ section {
     max-width: 100%; /* Ensure sections don't exceed viewport */
     margin: 0 auto;
     box-sizing: border-box; /* Include padding in width calculation */
+    overflow-x: hidden;
 }
 
 .section-header {
@@ -415,6 +437,7 @@ section {
     gap: 1rem;
     margin-bottom: 4rem;
     flex-wrap: wrap; /* Allow wrapping on small screens */
+    width: 100%;
 }
 
 .section-number {
@@ -729,6 +752,7 @@ footer {
     transition: border-color 0.5s ease;
     width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .footer-line {
@@ -895,4 +919,11 @@ main {
 /* Ensure all content stays within viewport */
 section > * {
     max-width: 100%;
+}
+
+/* Force the entire document to stay within viewport width */
+#root, #__next {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
