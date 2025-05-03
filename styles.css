@@ -51,6 +51,7 @@
 html {
     scroll-behavior: smooth;
     cursor: none;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 body {
@@ -59,9 +60,10 @@ body {
     font-family: var(--font-main);
     font-weight: 300;
     line-height: 1.6;
-    overflow-x: hidden;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     position: relative;
     transition: background-color 0.5s ease, color 0.5s ease;
+    width: 100%; /* Ensure body doesn't exceed viewport width */
 }
 
 /* Prevent scrolling when mobile menu is open */
@@ -253,11 +255,15 @@ nav ul {
     justify-content: center;
     align-items: center;
     position: relative;
+    width: 100%; /* Ensure full width */
+    max-width: 100%; /* Prevent overflow */
 }
 
 .hero-content {
     text-align: center;
     z-index: 2;
+    width: 100%; /* Full width */
+    padding: 0 1rem; /* Add padding for small screens */
 }
 
 h1 {
@@ -266,6 +272,7 @@ h1 {
     letter-spacing: 0.5vw;
     margin-bottom: 1rem;
     position: relative;
+    word-break: break-word; /* Allow text to break on small screens */
 }
 
 /* Glitch Effect */
@@ -343,6 +350,7 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 1rem;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .title-line {
@@ -395,9 +403,10 @@ h1 {
 
 /* Section Styles */
 section {
-    padding: 8rem 2rem;
-    max-width: 1400px;
+    padding: 8rem 1rem; /* Reduced side padding */
+    max-width: 100%; /* Ensure sections don't exceed viewport */
     margin: 0 auto;
+    box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .section-header {
@@ -405,6 +414,7 @@ section {
     align-items: center;
     gap: 1rem;
     margin-bottom: 4rem;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .section-number {
@@ -424,17 +434,19 @@ h2 {
     font-weight: 300;
     line-height: 1.2;
     margin-bottom: 3rem;
-    max-width: 800px;
+    max-width: 100%; /* Ensure text doesn't exceed viewport */
+    word-wrap: break-word; /* Allow long words to break */
 }
 
 /* About Section */
 .about-content {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .about-details {
-    max-width: 600px;
+    max-width: 100%;
 }
 
 .about-details p {
@@ -460,6 +472,7 @@ h2 {
 /* Language Section */
 .language-section {
     margin-top: 2rem;
+    width: 100%;
 }
 
 .language-section h3 {
@@ -472,6 +485,7 @@ h2 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
+    width: 100%;
 }
 
 .language-item {
@@ -492,6 +506,7 @@ h2 {
 /* Interests Section */
 .interests-section {
     margin-top: 2rem;
+    width: 100%;
 }
 
 .interests-section h3 {
@@ -504,6 +519,7 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    width: 100%;
 }
 
 .interests-list li {
@@ -524,11 +540,14 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 4rem;
+    width: 100%;
 }
 
 .timeline {
     position: relative;
     padding-left: 2rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .timeline::before {
@@ -544,6 +563,7 @@ h2 {
 .timeline-item {
     position: relative;
     margin-bottom: 3rem;
+    width: 100%;
 }
 
 .timeline-item::before {
@@ -567,6 +587,7 @@ h2 {
     font-size: 1.5rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
 }
 
 .timeline-content h4 {
@@ -584,11 +605,13 @@ h2 {
 
 .timeline-content ul li {
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
 }
 
 /* Education */
 .education {
     margin-top: 2rem;
+    width: 100%;
 }
 
 .education h3 {
@@ -601,6 +624,8 @@ h2 {
     display: flex;
     gap: 2rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    width: 100%;
 }
 
 .education-date {
@@ -612,6 +637,7 @@ h2 {
     font-size: 1.2rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
 }
 
 .education-content p {
@@ -623,6 +649,7 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 3rem;
+    width: 100%;
 }
 
 .skills-category h3 {
@@ -635,6 +662,7 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    width: 100%;
 }
 
 .skill-item {
@@ -643,6 +671,8 @@ h2 {
     border: 1px solid var(--card-border);
     border-radius: 4px;
     transition: all 0.3s ease;
+    word-wrap: break-word;
+    max-width: 100%; /* Ensure items don't exceed container width */
 }
 
 .skill-item:hover {
@@ -654,12 +684,14 @@ h2 {
 .contact-content {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .contact-links {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
 }
 
 .contact-link {
@@ -668,6 +700,8 @@ h2 {
     font-size: 1.2rem;
     padding: 0.5rem 0;
     width: fit-content;
+    word-wrap: break-word;
+    max-width: 100%; /* Ensure links don't exceed container width */
 }
 
 .contact-link::after {
@@ -693,6 +727,8 @@ footer {
     align-items: center;
     border-top: 1px solid var(--footer-border);
     transition: border-color 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .footer-line {
@@ -812,6 +848,7 @@ footer {
     
     .skill-item {
         padding: 0.5rem 1rem;
+        font-size: 0.9rem; /* Smaller font size on mobile */
     }
     
     /* Make sure header elements don't get too close on very small screens */
@@ -832,10 +869,30 @@ footer {
             width: 35px;
             height: 35px;
         }
+        
+        .large-text {
+            font-size: 7vw; /* Slightly larger on very small screens */
+        }
+        
+        .skill-item {
+            width: 100%; /* Full width on very small screens */
+        }
     }
 }
 
 /* Header when menu is open */
 header.menu-open {
     background-color: transparent;
+}
+
+/* Fix for horizontal scrolling on mobile */
+main {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Ensure all content stays within viewport */
+section > * {
+    max-width: 100%;
 }
