@@ -3878,6 +3878,10 @@ function _canvas_height() { return window.innerHeight; }
       abortOnCannotGrowMemory(requestedSize);
     };
 
+  var _emscripten_run_script = (ptr) => {
+      eval(UTF8ToString(ptr));
+    };
+
   
   var handleException = (e) => {
       // Certain exception types we do not treat as errors since they are used for
@@ -6956,6 +6960,8 @@ var wasmImports = {
   /** @export */
   emscripten_resize_heap: _emscripten_resize_heap,
   /** @export */
+  emscripten_run_script: _emscripten_run_script,
+  /** @export */
   emscripten_set_main_loop: _emscripten_set_main_loop,
   /** @export */
   fd_close: _fd_close,
@@ -7037,6 +7043,7 @@ var wasmImports = {
 var wasmExports;
 createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
+var _on_pinch = Module['_on_pinch'] = createExportWrapper('on_pinch', 1);
 var _main = Module['_main'] = createExportWrapper('main', 2);
 var _fflush = createExportWrapper('fflush', 1);
 var _free = createExportWrapper('free', 1);
@@ -7049,7 +7056,7 @@ var _emscripten_stack_get_end = () => (_emscripten_stack_get_end = wasmExports['
 var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['_emscripten_stack_restore'])(a0);
 var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
-var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 66272;
+var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 67148;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
