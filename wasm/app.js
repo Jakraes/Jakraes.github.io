@@ -644,6 +644,19 @@ function abort(what) {
   // definition for WebAssembly.RuntimeError claims it takes no arguments even
   // though it can.
   // TODO(https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure gets fixed.
+  // See above, in the meantime, we resort to wasm code for trapping.
+  //
+  // In case abort() is called before the module is initialized, wasmExports
+  // and its exported '__trap' function is not available, in which case we throw
+  // a RuntimeError.
+  //
+  // We trap instead of throwing RuntimeError to prevent infinite-looping in
+  // Wasm EH code (because RuntimeError is considered as a foreign exception and
+  // caught by 'catch_all'), but in case throwing RuntimeError is fine because
+  // the module has not even been instantiated, even less running.
+  if (runtimeInitialized) {
+    ___trap();
+  }
   /** @suppress {checkTypes} */
   var e = new WebAssembly.RuntimeError(what);
 
@@ -818,10 +831,6 @@ async function createWasm() {
 }
 
 // === Body ===
-
-function _canvas_width() { return window.innerWidth; }
-function _canvas_height() { return window.innerHeight; }
-
 // end include: preamble.js
 
 
@@ -895,10 +904,6 @@ function _canvas_height() { return window.innerHeight; }
       default: abort(`invalid type for setValue: ${type}`);
     }
   }
-
-  var stackRestore = (val) => __emscripten_stack_restore(val);
-
-  var stackSave = () => _emscripten_stack_get_current();
 
   var warnOnce = (text) => {
       warnOnce.shown ||= {};
@@ -3891,7 +3896,7 @@ function _canvas_height() { return window.innerHeight; }
       checkStackCookie();
       if (e instanceof WebAssembly.RuntimeError) {
         if (_emscripten_stack_get_current() <= 0) {
-          err('Stack overflow detected.  You can try increasing -sSTACK_SIZE (currently set to 65536)');
+          err('Stack overflow detected.  You can try increasing -sSTACK_SIZE (currently set to 2097152)');
         }
       }
       quit_(1, e);
@@ -4211,6 +4216,7 @@ function _canvas_height() { return window.innerHeight; }
       var iterFunc = getWasmTableEntry(func);
       setMainLoop(iterFunc, fps, simulateInfiniteLoop);
     };
+
 
   function _fd_close(fd) {
   try {
@@ -4804,6 +4810,8 @@ function _canvas_height() { return window.innerHeight; }
       return id;
     };
 
+  var _glCullFace = (x0) => GLctx.cullFace(x0);
+
   var _glDeleteShader = (id) => {
       if (!id) return;
       var shader = GL.shaders[id];
@@ -4817,52 +4825,13 @@ function _canvas_height() { return window.innerHeight; }
       GL.shaders[id] = null;
     };
 
-  var _glDrawElements = (mode, count, type, indices) => {
-      var buf;
-      var vertexes = 0;
-      if (!GLctx.currentElementArrayBufferBinding) {
-        var size = GL.calcBufLength(1, type, 0, count);
-        buf = GL.getTempIndexBuffer(size);
-        GLctx.bindBuffer(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, buf);
-        GLctx.bufferSubData(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/,
-                            0,
-                            HEAPU8.subarray(indices, indices + size));
-        
-        // Calculating vertex count if shader's attribute data is on client side
-        if (count > 0) {
-          for (var i = 0; i < GL.currentContext.maxVertexAttribs; ++i) {
-            var cb = GL.currentContext.clientBuffers[i];
-            if (cb.clientside && cb.enabled) {
-              let arrayClass;
-              switch(type) {
-                case 0x1401 /* GL_UNSIGNED_BYTE */: arrayClass = Uint8Array; break;
-                case 0x1403 /* GL_UNSIGNED_SHORT */: arrayClass = Uint16Array; break;
-                case 0x1405 /* GL_UNSIGNED_INT */: arrayClass = Uint32Array; break;
-                default:
-                  GL.recordError(0x502 /* GL_INVALID_OPERATION */);
-                  return;
-              }
-  
-              vertexes = new arrayClass(HEAPU8.buffer, indices, count).reduce((max, current) => Math.max(max, current)) + 1;
-              break;
-            }
-          }
-        }
-  
-        // the index is now 0
-        indices = 0;
-      }
-  
+  var _glDrawArrays = (mode, first, count) => {
       // bind any client-side buffers
-      GL.preDrawHandleClientVertexAttribBindings(vertexes);
+      GL.preDrawHandleClientVertexAttribBindings(first + count);
   
-      GLctx.drawElements(mode, count, type, indices);
+      GLctx.drawArrays(mode, first, count);
   
-      GL.postDrawHandleClientVertexAttribBindings(count);
-  
-      if (!GLctx.currentElementArrayBufferBinding) {
-        GLctx.bindBuffer(0x8893 /*GL_ELEMENT_ARRAY_BUFFER*/, null);
-      }
+      GL.postDrawHandleClientVertexAttribBindings();
     };
 
   var _glEnable = (x0) => GLctx.enable(x0);
@@ -4872,6 +4841,8 @@ function _canvas_height() { return window.innerHeight; }
       cb.enabled = true;
       GLctx.enableVertexAttribArray(index);
     };
+
+  var _glFrontFace = (x0) => GLctx.frontFace(x0);
 
   var _glGenBuffers = (n, buffers) => {
       GL.genObject(n, buffers, 'createBuffer', GL.buffers
@@ -5111,6 +5082,11 @@ function _canvas_height() { return window.innerHeight; }
       }
     };
   
+  var _glUniform3i = (location, v0, v1, v2) => {
+      GLctx.uniform3i(webglGetUniformLocation(location), v0, v1, v2);
+    };
+
+  
   var _glUniformMatrix4fv = (location, count, transpose, value) => {
   
       count && GLctx.uniformMatrix4fv(webglGetUniformLocation(location), !!transpose, HEAPF32, ((value)>>2), count*16);
@@ -5124,22 +5100,22 @@ function _canvas_height() { return window.innerHeight; }
       GLctx.currentProgram = program;
     };
 
-  var _glVertexAttribPointer = (index, size, type, normalized, stride, ptr) => {
+  var _glVertexAttribIPointer = (index, size, type, stride, ptr) => {
       var cb = GL.currentContext.clientBuffers[index];
       if (!GLctx.currentArrayBufferBinding) {
         cb.size = size;
         cb.type = type;
-        cb.normalized = normalized;
+        cb.normalized = false;
         cb.stride = stride;
         cb.ptr = ptr;
         cb.clientside = true;
         cb.vertexAttribPointerAdaptor = function(index, size, type, normalized, stride, ptr) {
-          this.vertexAttribPointer(index, size, type, normalized, stride, ptr);
+          this.vertexAttribIPointer(index, size, type, stride, ptr);
         };
         return;
       }
       cb.clientside = false;
-      GLctx.vertexAttribPointer(index, size, type, !!normalized, stride, ptr);
+      GLctx.vertexAttribIPointer(index, size, type, stride, ptr);
     };
 
   var _glViewport = (x0, x1, x2, x3) => GLctx.viewport(x0, x1, x2, x3);
@@ -6798,6 +6774,12 @@ function _canvas_height() { return window.innerHeight; }
   };
   var _glfwCreateWindow = (width, height, title, monitor, share) => GLFW.createWindow(width, height, title, monitor, share);
 
+  var _glfwDestroyWindow = (winid) => GLFW.destroyWindow(winid);
+
+  var _glfwGetKey = (winid, key) => GLFW.getKey(winid, key);
+
+  var _glfwGetPrimaryMonitor = () => 1;
+
   var _glfwGetTime = () => GLFW.getTime() - GLFW.initialTime;
 
   
@@ -6858,6 +6840,20 @@ function _canvas_height() { return window.innerHeight; }
 
   var _glfwPollEvents = () => 0;
 
+  var _glfwSetCursorPosCallback = (winid, cbfun) => GLFW.setCursorPosCallback(winid, cbfun);
+
+  var _glfwSetFramebufferSizeCallback = (winid, cbfun) => {
+      var win = GLFW.WindowFromId(winid);
+      if (!win) return null;
+      var prevcbfun = win.framebufferSizeFunc;
+      win.framebufferSizeFunc = cbfun;
+      return prevcbfun;
+    };
+
+  var _glfwSetInputMode = (winid, mode, value) => {
+      GLFW.setInputMode(winid, mode, value);
+    };
+
   var _glfwSwapBuffers = (winid) => GLFW.swapBuffers(winid);
 
   var _glfwTerminate = () => {
@@ -6897,98 +6893,6 @@ function _canvas_height() { return window.innerHeight; }
 
 
 
-  var getCFunc = (ident) => {
-      var func = Module['_' + ident]; // closure exported function
-      assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
-      return func;
-    };
-  
-  var writeArrayToMemory = (array, buffer) => {
-      assert(array.length >= 0, 'writeArrayToMemory array must have a length (should be an array or typed array)')
-      HEAP8.set(array, buffer);
-    };
-  
-  
-  
-  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
-  var stringToUTF8OnStack = (str) => {
-      var size = lengthBytesUTF8(str) + 1;
-      var ret = stackAlloc(size);
-      stringToUTF8(str, ret, size);
-      return ret;
-    };
-  
-  
-  
-  
-  
-    /**
-     * @param {string|null=} returnType
-     * @param {Array=} argTypes
-     * @param {Arguments|Array=} args
-     * @param {Object=} opts
-     */
-  var ccall = (ident, returnType, argTypes, args, opts) => {
-      // For fast lookup of conversion functions
-      var toC = {
-        'string': (str) => {
-          var ret = 0;
-          if (str !== null && str !== undefined && str !== 0) { // null string
-            ret = stringToUTF8OnStack(str);
-          }
-          return ret;
-        },
-        'array': (arr) => {
-          var ret = stackAlloc(arr.length);
-          writeArrayToMemory(arr, ret);
-          return ret;
-        }
-      };
-  
-      function convertReturnValue(ret) {
-        if (returnType === 'string') {
-          return UTF8ToString(ret);
-        }
-        if (returnType === 'boolean') return Boolean(ret);
-        return ret;
-      }
-  
-      var func = getCFunc(ident);
-      var cArgs = [];
-      var stack = 0;
-      assert(returnType !== 'array', 'Return type should not be "array".');
-      if (args) {
-        for (var i = 0; i < args.length; i++) {
-          var converter = toC[argTypes[i]];
-          if (converter) {
-            if (stack === 0) stack = stackSave();
-            cArgs[i] = converter(args[i]);
-          } else {
-            cArgs[i] = args[i];
-          }
-        }
-      }
-      var ret = func(...cArgs);
-      function onDone(ret) {
-        if (stack !== 0) stackRestore(stack);
-        return convertReturnValue(ret);
-      }
-  
-      ret = onDone(ret);
-      return ret;
-    };
-
-  
-  
-    /**
-     * @param {string=} returnType
-     * @param {Array=} argTypes
-     * @param {Object=} opts
-     */
-  var cwrap = (ident, returnType, argTypes, opts) => {
-      return (...args) => ccall(ident, returnType, argTypes, args, opts);
-    };
-
   var FS_createPath = FS.createPath;
 
 
@@ -6998,6 +6902,64 @@ function _canvas_height() { return window.innerHeight; }
   var FS_createLazyFile = FS.createLazyFile;
 
   var FS_createDevice = FS.createDevice;
+
+  
+  var getCppExceptionTag = () =>
+      // In static linking, tags are defined within the wasm module and are
+      // exported, whereas in dynamic linking, tags are defined in library.js in
+      // JS code and wasm modules import them.
+      wasmExports['__cpp_exception'];
+  
+  var getCppExceptionThrownObjectFromWebAssemblyException = (ex) => {
+      // In Wasm EH, the value extracted from WebAssembly.Exception is a pointer
+      // to the unwind header. Convert it to the actual thrown value.
+      var unwind_header = ex.getArg(getCppExceptionTag(), 0);
+      return ___thrown_object_from_unwind_exception(unwind_header);
+    };
+  var incrementExceptionRefcount = (ex) => {
+      var ptr = getCppExceptionThrownObjectFromWebAssemblyException(ex);
+      ___cxa_increment_exception_refcount(ptr);
+    };
+  Module['incrementExceptionRefcount'] = incrementExceptionRefcount;
+
+  
+  var decrementExceptionRefcount = (ex) => {
+      var ptr = getCppExceptionThrownObjectFromWebAssemblyException(ex);
+      ___cxa_decrement_exception_refcount(ptr);
+    };
+  Module['decrementExceptionRefcount'] = decrementExceptionRefcount;
+
+  
+  
+  
+  var stackSave = () => _emscripten_stack_get_current();
+  
+  var stackRestore = (val) => __emscripten_stack_restore(val);
+  
+  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
+  
+  var getExceptionMessageCommon = (ptr) => {
+      var sp = stackSave();
+      var type_addr_addr = stackAlloc(4);
+      var message_addr_addr = stackAlloc(4);
+      ___get_exception_message(ptr, type_addr_addr, message_addr_addr);
+      var type_addr = HEAPU32[((type_addr_addr)>>2)];
+      var message_addr = HEAPU32[((message_addr_addr)>>2)];
+      var type = UTF8ToString(type_addr);
+      _free(type_addr);
+      var message;
+      if (message_addr) {
+        message = UTF8ToString(message_addr);
+        _free(message_addr);
+      }
+      stackRestore(sp);
+      return [type, message];
+    };
+  var getExceptionMessage = (ex) => {
+      var ptr = getCppExceptionThrownObjectFromWebAssemblyException(ex);
+      return getExceptionMessageCommon(ptr);
+    };
+  Module['getExceptionMessage'] = getExceptionMessage;
 
   FS.createPreloadedFile = FS_createPreloadedFile;
   FS.staticInit();
@@ -7040,15 +7002,13 @@ var wasmImports = {
   /** @export */
   _abort_js: __abort_js,
   /** @export */
-  _canvas_height,
-  /** @export */
-  _canvas_width,
-  /** @export */
   _emscripten_fs_load_embedded_files: __emscripten_fs_load_embedded_files,
   /** @export */
   emscripten_resize_heap: _emscripten_resize_heap,
   /** @export */
   emscripten_set_main_loop: _emscripten_set_main_loop,
+  /** @export */
+  exit: _exit,
   /** @export */
   fd_close: _fd_close,
   /** @export */
@@ -7076,13 +7036,17 @@ var wasmImports = {
   /** @export */
   glCreateShader: _glCreateShader,
   /** @export */
+  glCullFace: _glCullFace,
+  /** @export */
   glDeleteShader: _glDeleteShader,
   /** @export */
-  glDrawElements: _glDrawElements,
+  glDrawArrays: _glDrawArrays,
   /** @export */
   glEnable: _glEnable,
   /** @export */
   glEnableVertexAttribArray: _glEnableVertexAttribArray,
+  /** @export */
+  glFrontFace: _glFrontFace,
   /** @export */
   glGenBuffers: _glGenBuffers,
   /** @export */
@@ -7102,15 +7066,23 @@ var wasmImports = {
   /** @export */
   glShaderSource: _glShaderSource,
   /** @export */
+  glUniform3i: _glUniform3i,
+  /** @export */
   glUniformMatrix4fv: _glUniformMatrix4fv,
   /** @export */
   glUseProgram: _glUseProgram,
   /** @export */
-  glVertexAttribPointer: _glVertexAttribPointer,
+  glVertexAttribIPointer: _glVertexAttribIPointer,
   /** @export */
   glViewport: _glViewport,
   /** @export */
   glfwCreateWindow: _glfwCreateWindow,
+  /** @export */
+  glfwDestroyWindow: _glfwDestroyWindow,
+  /** @export */
+  glfwGetKey: _glfwGetKey,
+  /** @export */
+  glfwGetPrimaryMonitor: _glfwGetPrimaryMonitor,
   /** @export */
   glfwGetTime: _glfwGetTime,
   /** @export */
@@ -7119,6 +7091,12 @@ var wasmImports = {
   glfwMakeContextCurrent: _glfwMakeContextCurrent,
   /** @export */
   glfwPollEvents: _glfwPollEvents,
+  /** @export */
+  glfwSetCursorPosCallback: _glfwSetCursorPosCallback,
+  /** @export */
+  glfwSetFramebufferSizeCallback: _glfwSetFramebufferSizeCallback,
+  /** @export */
+  glfwSetInputMode: _glfwSetInputMode,
   /** @export */
   glfwSwapBuffers: _glfwSwapBuffers,
   /** @export */
@@ -7129,12 +7107,12 @@ var wasmImports = {
 var wasmExports;
 createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
-var _onPinch = Module['_onPinch'] = createExportWrapper('onPinch', 1);
+var _malloc = createExportWrapper('malloc', 1);
+var _free = createExportWrapper('free', 1);
 var _main = Module['_main'] = createExportWrapper('main', 2);
 var _fflush = createExportWrapper('fflush', 1);
-var _free = createExportWrapper('free', 1);
-var _malloc = createExportWrapper('malloc', 1);
 var _strerror = createExportWrapper('strerror', 1);
+var ___trap = () => (___trap = wasmExports['__trap'])();
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
 var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
@@ -7142,15 +7120,17 @@ var _emscripten_stack_get_end = () => (_emscripten_stack_get_end = wasmExports['
 var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['_emscripten_stack_restore'])(a0);
 var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
-var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 66272;
+var ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', 1);
+var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', 1);
+var ___thrown_object_from_unwind_exception = createExportWrapper('__thrown_object_from_unwind_exception', 1);
+var ___get_exception_message = createExportWrapper('__get_exception_message', 3);
+var ___emscripten_embedded_file_data = Module['___emscripten_embedded_file_data'] = 2101592;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
 
 Module['addRunDependency'] = addRunDependency;
 Module['removeRunDependency'] = removeRunDependency;
-Module['ccall'] = ccall;
-Module['cwrap'] = cwrap;
 Module['FS_createPreloadedFile'] = FS_createPreloadedFile;
 Module['FS_unlink'] = FS_unlink;
 Module['FS_createPath'] = FS_createPath;
@@ -7197,6 +7177,9 @@ var missingLibrarySymbols = [
   'STACK_ALIGN',
   'POINTER_SIZE',
   'ASSERTIONS',
+  'getCFunc',
+  'ccall',
+  'cwrap',
   'uleb128Encode',
   'sigToWasmTypes',
   'generateFuncType',
@@ -7220,6 +7203,8 @@ var missingLibrarySymbols = [
   'UTF32ToString',
   'stringToUTF32',
   'lengthBytesUTF32',
+  'stringToUTF8OnStack',
+  'writeArrayToMemory',
   'registerKeyEventCallback',
   'maybeCStringToJsString',
   'findEventTarget',
@@ -7276,8 +7261,6 @@ var missingLibrarySymbols = [
   'makePromise',
   'idsToPromises',
   'makePromiseCallback',
-  'ExceptionInfo',
-  'findMatchingCatch',
   'Browser_asyncPrepareDataCounter',
   'isLeapYear',
   'ydayFromDate',
@@ -7356,7 +7339,6 @@ var unexportedSymbols = [
   'noExitRuntime',
   'addOnPreRun',
   'addOnPostRun',
-  'getCFunc',
   'freeTableIndexes',
   'functionsInTableMap',
   'setValue',
@@ -7372,8 +7354,6 @@ var unexportedSymbols = [
   'intArrayFromString',
   'UTF16Decoder',
   'stringToNewUTF8',
-  'stringToUTF8OnStack',
-  'writeArrayToMemory',
   'JSEvents',
   'specialHTMLTargets',
   'findCanvasEventTarget',
@@ -7391,9 +7371,12 @@ var unexportedSymbols = [
   'emClearImmediate',
   'registerPreMainLoop',
   'promiseMap',
-  'uncaughtExceptionCount',
-  'exceptionLast',
-  'exceptionCaught',
+  'getExceptionMessageCommon',
+  'getCppExceptionTag',
+  'getCppExceptionThrownObjectFromWebAssemblyException',
+  'incrementExceptionRefcount',
+  'decrementExceptionRefcount',
+  'getExceptionMessage',
   'Browser',
   'getPreloadedImageData__data',
   'wget',
